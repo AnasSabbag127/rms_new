@@ -1,0 +1,43 @@
+
+CREATE TABLE IF NOT EXISTS roles (
+  id SERIAL PRIMARY KEY NOT NULL,
+  role_name VARCHAR(55) NOT NULL
+);
+
+
+CREATE TABLE IF NOT EXISTS usersNew(
+  id SERIAL PRIMARY KEY NOT NULL,
+  name VARCHAR(55) NOT NULL,
+  password VARCHAR(55) NOT NULL UNIQUE,
+  email VARCHAR(55) NOT NULL UNIQUE,
+  address VARCHAR(200) NOT NULL,
+  role_id INTEGER,
+  CONSTRAINT fk_roles
+    FOREIGN KEY(role_id)
+    REFERENCES roles(id)
+);
+
+
+CREATE TABLE IF NOT EXISTS restraunts (
+  id SERIAL PRIMARY KEY NOT NULL,
+  name VARCHAR(55) NOT NULL,
+  address VARCHAR(200) NOT NULL,
+  created_by INTEGER,
+    CONSTRAINT fk_users
+        FOREIGN KEY(created_by)
+        REFERENCES usersNew(id)
+);
+
+CREATE TABLE IF NOT EXISTS dishes (
+  id SERIAL PRIMARY KEY NOT NULL,
+  name VARCHAR(55) NOT NULL,
+  price INTEGER NOT NULL,
+  created_by INTEGER,
+  restraunt_id INTEGER,
+    CONSTRAINT fk_users
+        FOREIGN KEY(created_by)
+        REFERENCES usersNew(id),
+    CONSTRAINT fk_restraunt
+        FOREIGN KEY(restraunt_id)
+        REFERENCES restraunts(id)
+);
