@@ -13,8 +13,10 @@ import (
 // make restraunts api(CRUD) routes here
 
 func CreateRestaurantHandler(w http.ResponseWriter, r *http.Request) {
-
-	var newRest model.InputRestraunt
+	//if middlewares.CheckForTokenValidation(w, r) == false {
+	//	return
+	//}
+	var newRest model.InputRestaurant
 	decoder := json.NewDecoder(r.Body)
 
 	if err := decoder.Decode(&newRest); err != nil {
@@ -48,7 +50,7 @@ func CreateRestaurantHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "json marshaling Error", http.StatusInternalServerError)
 		return
 	}
-	w.Write(jsonResponse)
+	_, err = w.Write(jsonResponse)
 }
 
 func UpdateRestaurantHandler(w http.ResponseWriter, r *http.Request) {

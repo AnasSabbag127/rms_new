@@ -5,6 +5,7 @@ import (
 	"awesomeProject/model"
 	"encoding/json"
 	"github.com/gorilla/mux"
+	"golang.org/x/crypto/bcrypt"
 	"log"
 	"net/http"
 )
@@ -32,14 +33,21 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db, err := database.ConnectToDB()
+	hashPsw, err := bcrypt.GenerateFromPassword([]byte(newUser.Password), bcrypt.DefaultCost)
+	if err != nil {
+		log.Println("password hashing error : ", err)
+		http.Error(w, "password hashing error ", http.StatusInternalServerError)
+		return
+	}
+	hashPswStr := string(hashPsw)
 
+	db, err := database.ConnectToDB()
 	if err != nil {
 		http.Error(w, "failed to connect DB ", http.StatusInternalServerError)
 		return
 	}
-	sql := `INSERT INTO usersNew(name,email,address,password,role_id) VALUES($1,$2,$3,$4,$5)`
-	_, err = db.Exec(sql, newUser.Name, newUser.Email, newUser.Address, newUser.Password, newUser.RoleId)
+	sql := `INSERT INTO usersNew(name,email,address,password,role_id,created_by) VALUES($1,$2,$3,$4,$5,$6)`
+	_, err = db.Exec(sql, newUser.Name, newUser.Email, newUser.Address, hashPswStr, newUser.RoleId, newUser.CreatedBy)
 
 	if err != nil {
 		log.Println("DATABASE ERROR: ", err)
@@ -53,9 +61,9 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 	jsonResponse, err := json.Marshal(response)
 	if err != nil {
 		log.Println("json Marshaling error:  ", err)
-		http.Error(w, "json marhsaling Error", http.StatusInternalServerError)
+		http.Error(w, "json marshaling Error", http.StatusInternalServerError)
 		return
 	}
-	w.Write(jsonResponse)
+	_, err = w.Write(jsonResponse)
 
 }

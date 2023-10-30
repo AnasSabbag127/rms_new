@@ -8,11 +8,8 @@ import (
 	"net/http"
 )
 
-func handler(_ http.ResponseWriter, r *http.Request) {
-
-}
 func main() {
-	fmt.Println("jfjkf")
+	fmt.Println("RMS")
 	_, err := database.ConnectToDB()
 	if err != nil {
 		fmt.Println("database not connected: Error: ", err)
@@ -23,7 +20,8 @@ func main() {
 	// http.HandleFunc("/",handler)
 	// http.HandleFunc("/login",handler)
 	// //admin routes
-	// http.HandleFunc("/create-user",api.CreateUserHandler)
+
+	//http.HandleFunc("/admin/create-user", api.CreateUserHandler)
 	// http.HandleFunc("/user/create-restraunt",api.CreateRestrauntHandler)
 	// http.HandleFunc("/user/restraunt/create-dishes",api.CreateDishesHandler)
 
