@@ -26,7 +26,7 @@ func CreateRoutes() http.Handler {
 	r := mux.NewRouter()
 	r.Handle("/home", http.HandlerFunc(middlewares.Home)).Methods("GET")
 	r.Handle("/login", http.HandlerFunc(middlewares.Login)).Methods("POST")
-	r.Handle("/", api.UserRoutes(r))
+
 	r1 := r.PathPrefix("/").Subrouter()
 	authRoutes(r1)
 	return middlewares.EnableCORS(r)
@@ -35,4 +35,5 @@ func CreateRoutes() http.Handler {
 func authRoutes(r *mux.Router) {
 	r.Handle("/", api.AdminRoutes(r))
 	r.Handle("/", api.SubAdminRoutes(r))
+	//r.Handle("/", api.UserRoutes(r))
 }

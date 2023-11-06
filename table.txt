@@ -5,40 +5,48 @@ CREATE TABLE IF NOT EXISTS roles (
 );
 
 
-CREATE TABLE IF NOT EXISTS usersNew(
-  id SERIAL PRIMARY KEY NOT NULL,
-  name VARCHAR(55) NOT NULL,
-  password VARCHAR(55) NOT NULL UNIQUE,
-  email VARCHAR(55) NOT NULL UNIQUE,
-  address VARCHAR(200) NOT NULL,
-  role_id INTEGER,
-  CONSTRAINT fk_roles
-    FOREIGN KEY(role_id)
-    REFERENCES roles(id)
+create table usersnew
+(
+    id         serial
+        primary key,
+    name       varchar(55)           not null,
+    password   text                  not null
+        unique,
+    email      varchar(55)           not null
+        unique,
+    address    varchar(200)          not null,
+    role_id    integer
+        constraint fk_roles
+            references roles,
+    created_by integer               not null,
+    is_deleted boolean default false not null
 );
 
-ALTER TABLE usersNew ADD COLUMN createdBy INTEGER NOT NULL;
 
-CREATE TABLE IF NOT EXISTS restraunts (
-  id SERIAL PRIMARY KEY NOT NULL,
-  name VARCHAR(55) NOT NULL,
-  address VARCHAR(200) NOT NULL,
-  created_by INTEGER,
-    CONSTRAINT fk_users
-        FOREIGN KEY(created_by)
-        REFERENCES usersNew(id)
+create table restraunts
+(
+    id         serial
+        primary key,
+    name       varchar(55)           not null,
+    address    varchar(200)          not null,
+    created_by integer
+        constraint fk_users
+            references usersnew,
+    stars      integer               not null,
+    is_deleted boolean default false not null
 );
 
-CREATE TABLE IF NOT EXISTS dishes (
-  id SERIAL PRIMARY KEY NOT NULL,
-  name VARCHAR(55) NOT NULL,
-  price INTEGER NOT NULL,
-  created_by INTEGER,
-  restraunt_id INTEGER,
-    CONSTRAINT fk_users
-        FOREIGN KEY(created_by)
-        REFERENCES usersNew(id),
-    CONSTRAINT fk_restraunt
-        FOREIGN KEY(restraunt_id)
-        REFERENCES restraunts(id)
+create table dishes
+(
+    id           serial
+        primary key,
+    name         varchar(55)           not null,
+    price        integer               not null,
+    created_by   integer
+        constraint fk_users
+            references usersnew,
+    restraunt_id integer
+        constraint fk_restraunt
+            references restraunts,
+    is_deleted   boolean default false not null
 );

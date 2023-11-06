@@ -12,7 +12,8 @@ type User struct {
 	Address   pq.StringArray `json:"address" db:"address"`
 	RoleId    int            `json:"roleId" db:"role_id"`
 	IsAdmin   bool           `json:"isAdmin" db:"is_admin"`
-	CreatedBy int            `json:"createdBy db:created_by"`
+	CreatedBy int            `json:"createdBy" db:"created_by"`
+	IsDeleted bool           `json:"IsDeleted" db:"is_deleted"`
 }
 type InputUser struct {
 	Name      string         `json:"name" db:"name"`
@@ -29,6 +30,5 @@ type OutputUser struct {
 	Email     string         `json:"email" db:"email"`
 	Address   pq.StringArray `json:"address" db:"address"`
 	RoleId    int            `json:"roleId" db:"role_id"`
-	IsAdmin   bool           `json:"isAdmin" db:"is_admin"`
-	CreatedBy int            `json:"createdBy db:created_by"`
+	CreatedBy int            `json:"createdBy" db:"created_by"`
 }

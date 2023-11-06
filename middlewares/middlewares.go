@@ -133,7 +133,6 @@ func CheckForTokenValidation(w http.ResponseWriter, r *http.Request) bool {
 		w.WriteHeader(http.StatusBadRequest)
 		return false
 	}
-	_, err = w.Write([]byte(fmt.Sprintf("hello , %s", claims.Username)))
 	w.WriteHeader(http.StatusOK)
 	return true
 }

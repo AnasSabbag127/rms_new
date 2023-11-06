@@ -2,6 +2,7 @@ package api
 
 import (
 	"awesomeProject/database"
+	"awesomeProject/middlewares"
 	"awesomeProject/model"
 	"encoding/json"
 	"github.com/gorilla/mux"
@@ -49,6 +50,11 @@ func CreateDishesHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateDishHandler(w http.ResponseWriter, r *http.Request) {
+	if middlewares.CheckForTokenValidation(w, r) == false {
+		log.Println("Invalid token ")
+		http.Error(w, "Invalid Token", http.StatusUnauthorized)
+		return
+	}
 	var updateDish model.Dishes
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&updateDish); err != nil {
@@ -97,14 +103,22 @@ func UpdateDishHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteDishHandler(w http.ResponseWriter, r *http.Request) {
-	pathParam := mux.Vars(r)
-	dishId, err := strconv.Atoi(pathParam["dishId"])
-	if err != nil {
-		log.Println("invalid path variable ", err)
-		http.Error(w, "Invalid Path variable", http.StatusBadRequest)
+	if middlewares.CheckForTokenValidation(w, r) == false {
+		log.Println("Invalid token ")
+		http.Error(w, "Invalid Token", http.StatusUnauthorized)
 		return
 	}
-	restId, err := strconv.Atoi(pathParam["restID"])
+	pathParam := mux.Vars(r)
+
+	dishId := r.URL.Query().Get("dishId")
+	dishID, err := strconv.Atoi(dishId)
+	if err != nil {
+		log.Println("invalid query param dishId", err)
+		http.Error(w, "Invalid query param dishId ", http.StatusBadRequest)
+		return
+	}
+	//restId from path variable
+	restId, err := strconv.Atoi(pathParam["restId"])
 	if err != nil {
 		log.Println("invalid path variable ", err)
 		http.Error(w, "Invalid Path variable", http.StatusBadRequest)
@@ -116,15 +130,16 @@ func DeleteDishHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "DB Conn Err: ", http.StatusInternalServerError)
 		return
 	}
-	sql := `DELETE FROM dishes WHERE restraunt_id = $1 AND id = $2`
-	_, err = db.Exec(sql, restId, dishId)
+
+	sql := `UPDATE dishes SET is_deleted = TRUE WHERE restraunt_id = $1 AND id = $2`
+	_, err = db.Exec(sql, restId, dishID)
 	if err != nil {
 		log.Println("SQL Error: ", err)
 		http.Error(w, "SQL Error:", http.StatusInternalServerError)
 		return
 	}
 	response := map[string]interface{}{
-		"message": "restaurant dish successfully deleted",
+		"message": "restaurant dish successfully soft deleted",
 		"restId":  restId,
 		"dishId":  dishId,
 	}
@@ -137,6 +152,11 @@ func DeleteDishHandler(w http.ResponseWriter, r *http.Request) {
 	_, err = w.Write(jsonResponse)
 }
 func GetAllDishHandler(w http.ResponseWriter, r *http.Request) {
+	if middlewares.CheckForTokenValidation(w, r) == false {
+		log.Println("Invalid token ")
+		http.Error(w, "Invalid Token", http.StatusUnauthorized)
+		return
+	}
 	dishes := make([]model.Dishes, 0)
 	pathParam := mux.Vars(r)
 	restId, err := strconv.Atoi(pathParam["restId"])
@@ -151,7 +171,7 @@ func GetAllDishHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "DB Conn Err: ", http.StatusInternalServerError)
 		return
 	}
-	sql := `SELECT id,name,price,created_by,restraunts_id FROM dishes WHERE restraunts_id =$1`
+	sql := `SELECT id,name,price,created_by,restraunt_id FROM dishes WHERE restraunt_id =$1 AND is_deleted = FALSE`
 
 	rows, err := db.Query(sql, restId)
 	if err != nil {
@@ -170,9 +190,9 @@ func GetAllDishHandler(w http.ResponseWriter, r *http.Request) {
 		dishes = append(dishes, dis)
 	}
 	response := map[string]interface{}{
-		"message":     "lists of of dishes of restaurant  ",
-		"Restaurants": restId,
-		"Dishes":      dishes,
+		"message":       "List of dishes of a restaurant ",
+		"Restaurant ID": restId,
+		"Dishes":        dishes,
 	}
 	jsonResponse, err := json.Marshal(response)
 	if err != nil {
